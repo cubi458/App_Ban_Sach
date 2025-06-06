@@ -1,0 +1,290 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        android:layout_alignParentTop="true"/>
+
+    <!-- ScrollView to contain details -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar">
+
+        <LinearLayout
+            android:id="@+id/tableHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <!-- Mã sản phẩm -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mã sản phẩm"/>
+
+                <TextView
+                    android:id="@+id/tvProductCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <!-- Số bán 7 ngày qua -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvSales7Days"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Số bán 7 ngày qua"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <!-- Số bán 30 ngày qua -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvSales30Days"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Số bán 30 ngày qua"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <!-- Vị trí kho -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vị trí kho"/>
+
+                <Spinner
+                    android:id="@+id/spinnerLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    />
+            </LinearLayout>
+
+            <!-- Tồn kho có sẵn -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tồn kho có sẵn"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/btnDecreaseAvailable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="-"/>
+
+                    <EditText
+                        android:id="@+id/etAvailableStock"
+                        android:layout_width="70dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0"
+                        android:inputType="number"
+                        android:textSize="18sp"/>
+
+                    <Button
+                        android:id="@+id/btnIncreaseAvailable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="+"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Tồn kho khuyến mãi -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tồn kho khuyến mãi"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/btnDecreasePromo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="-"/>
+
+                    <EditText
+                        android:id="@+id/etPromoStock"
+                        android:layout_width="70dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0"
+                        android:inputType="number"
+                        android:textSize="18sp"/>
+
+                    <Button
+                        android:id="@+id/btnIncreasePromo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="+"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Tồn kho tối thiểu -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Tồn kho tối thiểu"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/btnDecreaseMinimum"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="-"/>
+
+                    <EditText
+                        android:id="@+id/etMinimumStock"
+                        android:layout_width="70dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="0"
+                        android:inputType="number"
+                        android:textSize="18sp"/>
+
+                    <Button
+                        android:id="@+id/btnIncreaseMinimum"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="+"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Mức độ cần bổ sung hàng -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="15dp"
+                android:background="@drawable/rounded_corners"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mức độ cần bổ sung hàng"/>
+
+                <TextView
+                    android:id="@+id/tvSupplementLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textColor="@android:color/black"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cập nhật"
+                android:backgroundTint="@android:color/holo_purple"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="16dp"/>
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>
