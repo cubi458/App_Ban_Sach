@@ -8,11 +8,14 @@ import nlu.hcmuaf.android_bookapp.dto.response.CartItemResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListAddressResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListOrderResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.MessageResponseDTO;
+import nlu.hcmuaf.android_bookapp.dto.response.UserAdminResponseDTO;
+import nlu.hcmuaf.android_bookapp.entities.Users;
 import nlu.hcmuaf.android_bookapp.service.templates.IBillService;
 import nlu.hcmuaf.android_bookapp.service.templates.ICartService;
 import nlu.hcmuaf.android_bookapp.service.templates.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -93,5 +96,11 @@ public class UserController {
   @GetMapping("/orders/{userId}")
   public ResponseEntity<List<ListOrderResponseDTO>> getUserOrders(@PathVariable long userId) {
     return ResponseEntity.ok(billService.getUserOrder(userId));
+  }
+
+  @GetMapping("/admin/users")
+  @PreAuthorize("hasAuthority('ADMIN')")
+  public ResponseEntity<List<UserAdminResponseDTO>> getAllUsers() {
+    return ResponseEntity.ok(userService.getAllUsers());
   }
 }

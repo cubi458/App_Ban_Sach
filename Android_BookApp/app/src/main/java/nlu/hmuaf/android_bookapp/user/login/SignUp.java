@@ -87,19 +87,23 @@ public class SignUp extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     MessageResponseDTO responseDTO = response.body();
-                    if (responseDTO.getMessage().equals("Register success!")) {
+                    // Log ra message thực tế để debug
+                    android.util.Log.d("SignUp", "Register response: " + responseDTO.getMessage());
+                    if (responseDTO.getMessage() != null && responseDTO.getMessage().toLowerCase().contains("success")) {
                         Toast.makeText(SignUp.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(SignUp.this, Activate.class);
                         intent.putExtra("email", email);
                         startActivity(intent);
                         finish();
-                    } else if (responseDTO.getMessage().equals("Username used!")) {
+                    } else if (responseDTO.getMessage() != null && responseDTO.getMessage().toLowerCase().contains("username")) {
                         Toast.makeText(SignUp.this, "Tên người dùng đã được sử dụng!", Toast.LENGTH_SHORT).show();
-                    } else if (responseDTO.getMessage().equals("User already exist!")) {
+                    } else if (responseDTO.getMessage() != null && responseDTO.getMessage().toLowerCase().contains("exist")) {
                         Toast.makeText(SignUp.this, "Tài khoản đã tồn tại!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SignUp.this, "Lỗi server!", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(SignUp.this, "Lỗi sever!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUp.this, "Lỗi server!", Toast.LENGTH_SHORT).show();
                 }
             }
 

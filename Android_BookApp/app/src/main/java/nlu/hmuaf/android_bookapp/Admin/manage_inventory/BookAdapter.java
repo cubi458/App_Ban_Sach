@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import nlu.hmuaf.android_bookapp.R;
+import com.squareup.picasso.Picasso;
 
 public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder> {
 
@@ -64,11 +65,16 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
 
         public void bind(Book book) {
             tvProductName.setText(book.getTitle());
-            tvProductCode.setText(book.getBookID());
+            tvProductCode.setText("ID: " + book.getBookId());
             tvSupplementLevelData.setText(book.getStatus());
 
-            int imageResource = context.getResources().getIdentifier(book.getImageUrl(), "drawable", context.getPackageName());
-            imgProduct.setImageResource(imageResource);
+            // Load hình ảnh từ URL sử dụng Picasso
+            if (book.getThumbnail() != null && !book.getThumbnail().isEmpty()) {
+                Picasso.get().load(book.getThumbnail()).into(imgProduct);
+            } else {
+                // Fallback to default image
+                imgProduct.setImageResource(R.drawable.avatar);
+            }
 
             btnEdit.setOnClickListener(v -> {
                 Intent intent = new Intent(context, ProductDetailActivity.class);

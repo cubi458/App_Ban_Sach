@@ -12,6 +12,7 @@ public class User implements Serializable {
     private String firstName;
     private String lastName;
     private String phoneNum;
+    private String email;
 
     // Constructor
     public User(int userId, int role, String username, String password, String hash, String createdDate) {
@@ -98,5 +99,13 @@ public class User implements Serializable {
 
     public void setPhoneNum(String phoneNum) {
         this.phoneNum = phoneNum;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

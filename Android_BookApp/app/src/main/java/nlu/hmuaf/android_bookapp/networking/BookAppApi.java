@@ -3,6 +3,7 @@ package nlu.hmuaf.android_bookapp.networking;
 import java.util.List;
 
 import nlu.hmuaf.android_bookapp.dto.json.response.PageListBookResponseJson;
+import nlu.hmuaf.android_bookapp.dto.request.AddBookRequestDTO;
 import nlu.hmuaf.android_bookapp.dto.request.AddressRequestDTO;
 import nlu.hmuaf.android_bookapp.dto.request.BillRequestDTO;
 import nlu.hmuaf.android_bookapp.dto.request.CartItemRequestDTO;
@@ -19,6 +20,8 @@ import nlu.hmuaf.android_bookapp.dto.response.MessageResponseDTO;
 import nlu.hmuaf.android_bookapp.dto.response.PageBookResponseDTO;
 import nlu.hmuaf.android_bookapp.dto.response.TokenResponseDTO;
 import nlu.hmuaf.android_bookapp.room.entity.CartItems;
+import nlu.hmuaf.android_bookapp.user.profile.classess.User;
+import nlu.hmuaf.android_bookapp.dto.response.UserAdminResponseDTO;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -76,6 +79,12 @@ public interface BookAppApi {
             @Query("size") int size
     );
 
+    @GET("api/books/admin/all-books")
+    Call<List<ListBookResponseDTO>> getAllBooksForAdmin();
+
+    @POST("api/books/admin/add-book")
+    Call<BookDetailResponseDTO> addBook(@Body AddBookRequestDTO addBookRequestDTO);
+
     @GET("api/v1/key/get/google-map")
     Call<APIKeyResponse> getGoogleMapAPIKey();
 
@@ -96,4 +105,7 @@ public interface BookAppApi {
 
     @GET("api/v1/user/orders/{userId}")
     Call<List<ListOrderResponseDTO>> getUserListOrder(@Path("userId") long userId);
+
+    @GET("/api/v1/user/admin/users")
+    Call<List<UserAdminResponseDTO>> getAllUsers();
 }

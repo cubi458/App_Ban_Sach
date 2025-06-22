@@ -3,6 +3,7 @@ package nlu.hcmuaf.android_bookapp.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,21 +12,29 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nlu.hcmuaf.android_bookapp.dto.json.BooksWrapper;
+import nlu.hcmuaf.android_bookapp.dto.request.AddBookRequestDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.BookDetailResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListBookResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.PageBookResponseDTO;
+import nlu.hcmuaf.android_bookapp.entities.Addresses;
 import nlu.hcmuaf.android_bookapp.entities.BookDetails;
 import nlu.hcmuaf.android_bookapp.entities.BookImages;
 import nlu.hcmuaf.android_bookapp.entities.BookRating;
 import nlu.hcmuaf.android_bookapp.entities.Books;
 import nlu.hcmuaf.android_bookapp.entities.PublishCompany;
 import nlu.hcmuaf.android_bookapp.entities.Ratings;
+import nlu.hcmuaf.android_bookapp.entities.ShipmentDetails;
+import nlu.hcmuaf.android_bookapp.entities.Shipments;
+import nlu.hcmuaf.android_bookapp.entities.Users;
 import nlu.hcmuaf.android_bookapp.enums.EBookFormat;
 import nlu.hcmuaf.android_bookapp.exception.handler.ResourceNotFoundException;
+import nlu.hcmuaf.android_bookapp.repositories.AddressRepository;
 import nlu.hcmuaf.android_bookapp.repositories.BookDetailsRepository;
 import nlu.hcmuaf.android_bookapp.repositories.BookImageRepository;
 import nlu.hcmuaf.android_bookapp.repositories.BookRepository;
 import nlu.hcmuaf.android_bookapp.repositories.RatingRepository;
+import nlu.hcmuaf.android_bookapp.repositories.ShipmentRepository;
+import nlu.hcmuaf.android_bookapp.repositories.UserRepository;
 import nlu.hcmuaf.android_bookapp.service.templates.IBookService;
 import nlu.hcmuaf.android_bookapp.service.templates.IPublishCompanyService;
 import nlu.hcmuaf.android_bookapp.specifications.SearchCriteria;
@@ -58,6 +67,12 @@ public class BookServiceImpl implements IBookService {
   private BookImageRepository bookImageRepository;
   @Autowired
   private BookDetailsRepository bookDetailsRepository;
+  @Autowired
+  private ShipmentRepository shipmentRepository;
+  @Autowired
+  private UserRepository userRepository;
+  @Autowired
+  private AddressRepository addressRepository;
 
   @Override
   @Transactional(rollbackOn = Exception.class)
@@ -252,5 +267,138 @@ public class BookServiceImpl implements IBookService {
     pageBookResponseDTO.setTotalPages(booksPage.getTotalPages());
 
     return pageBookResponseDTO;
+  }
+
+  @Override
+  public List<ListBookResponseDTO> getAllBooksForAdmin() {
+    return bookRepository.getAllBooksForAdmin();
+  }
+
+  @Override
+  @Transactional(rollbackOn = Exception.class)
+  public BookDetailResponseDTO addBook(AddBookRequestDTO addBookRequestDTO) {
+    // Tạo entity Books
+    Books book = new Books();
+    book.setCode(addBookRequestDTO.getCode());
+    book.setTitle(addBookRequestDTO.getTitle());
+    book.setDescription(addBookRequestDTO.getDescription());
+    book.setPrice(addBookRequestDTO.getPrice());
+    book.setThumbnail(addBookRequestDTO.getThumbnail());
+
+    // Tạo BookDetails
+    BookDetails bookDetails = new BookDetails();
+    bookDetails.setAuthor(addBookRequestDTO.getAuthor());
+    bookDetails.setSize(addBookRequestDTO.getSize());
+    bookDetails.setNumPage(addBookRequestDTO.getNumPage());
+    bookDetails.setEBookFormat(addBookRequestDTO.getBookFormat());
+
+    // Tìm PublishCompany theo tên
+    PublishCompany publishCompany = publishCompanyService.getPublishCompanyByCompanyName(
+        addBookRequestDTO.getPublishCompanyName());
+    if (publishCompany == null) {
+      throw new ResourceNotFoundException("Publish company not found: " + addBookRequestDTO.getPublishCompanyName());
+    }
+    bookDetails.setPublishCompany(publishCompany);
+
+    // Liên kết Book và BookDetails
+    bookDetails.setBook(book);
+    book.setBookDetails(bookDetails);
+
+    // Tạo BookImages
+    if (addBookRequestDTO.getBookImages() != null && !addBookRequestDTO.getBookImages().isEmpty()) {
+      Set<BookImages> bookImagesSet = new HashSet<>();
+      for (String imageUrl : addBookRequestDTO.getBookImages()) {
+        BookImages bookImage = new BookImages();
+        bookImage.setBook(book);
+        bookImage.setUrl(imageUrl);
+        bookImagesSet.add(bookImage);
+      }
+      book.setBookImages(bookImagesSet);
+    }
+
+    // Lưu book vào database
+    Books savedBook = bookRepository.save(book);
+
+    // Tạo shipment details cho sách mới để có quantity
+    createShipmentDetailsForNewBook(savedBook);
+
+    // Tạo BookDetailResponseDTO để trả về
+    BookDetailResponseDTO responseDTO = new BookDetailResponseDTO();
+    responseDTO.setBookId(savedBook.getBookId());
+    responseDTO.setTitle(savedBook.getTitle());
+    responseDTO.setAuthor(bookDetails.getAuthor());
+    responseDTO.setOriginalPrice(savedBook.getPrice());
+    responseDTO.setDescription(savedBook.getDescription());
+    responseDTO.setDetails(bookDetails.toString());
+    responseDTO.setPublicCompany(publishCompany.getCompanyName());
+
+    // Lấy danh sách hình ảnh
+    if (savedBook.getBookImages() != null) {
+      List<String> imageUrls = savedBook.getBookImages().stream()
+          .map(BookImages::getUrl)
+          .collect(Collectors.toList());
+      responseDTO.setImg(imageUrls.toArray(new String[0]));
+    }
+
+    return responseDTO;
+  }
+
+  private void createShipmentDetailsForNewBook(Books book) {
+    try {
+      // Lấy shipment đầu tiên hoặc tạo mới nếu chưa có
+      List<Shipments> existingShipments = shipmentRepository.getAllBy();
+      Shipments shipment;
+      
+      if (existingShipments.isEmpty()) {
+        // Tạo shipment mới nếu chưa có
+        shipment = new Shipments();
+        shipment.setDateAdded(LocalDate.now());
+        shipment.setAvailable(true);
+        shipment.setTotalQuantity(50);
+        
+        // Lấy user admin đầu tiên
+        Optional<Users> adminUser = userRepository.findUsersByUsername("vuluu");
+        if (adminUser.isPresent()) {
+          shipment.setUser(adminUser.get());
+        }
+        
+        // Lấy address đầu tiên
+        Optional<Addresses> firstAddress = addressRepository.findById(1L);
+        if (firstAddress.isPresent()) {
+          shipment.setAddress(firstAddress.get());
+        }
+        
+        shipment = shipmentRepository.save(shipment);
+      } else {
+        // Sử dụng shipment đầu tiên
+        shipment = existingShipments.get(0);
+      }
+      
+      // Tạo shipment details cho sách mới
+      ShipmentDetails shipmentDetails = new ShipmentDetails();
+      shipmentDetails.setBook(book);
+      shipmentDetails.setShipment(shipment);
+      shipmentDetails.setQuantity(50); // Số lượng mặc định
+      shipmentDetails.setAvailable(true);
+      
+      // Lưu shipment details
+      // Note: ShipmentDetails có composite key nên cần lưu thông qua Shipments
+      Set<ShipmentDetails> currentDetails = shipment.getShipmentDetails();
+      if (currentDetails == null) {
+        currentDetails = new HashSet<>();
+      }
+      currentDetails.add(shipmentDetails);
+      shipment.setShipmentDetails(currentDetails);
+      
+      // Cập nhật total quantity của shipment
+      int currentTotal = shipment.getTotalQuantity();
+      shipment.setTotalQuantity(currentTotal + 50);
+      
+      shipmentRepository.save(shipment);
+      
+    } catch (Exception e) {
+      // Log lỗi nhưng không throw exception để không ảnh hưởng đến việc thêm sách
+      System.err.println("Error creating shipment details for book: " + e.getMessage());
+    }
   }
 }

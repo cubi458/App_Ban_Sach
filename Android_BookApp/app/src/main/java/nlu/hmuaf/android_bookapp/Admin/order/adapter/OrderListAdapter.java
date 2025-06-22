@@ -77,7 +77,7 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.Orde
             Picasso.get().load(order.getResourceid()).into(productImageView);
 
             // Tên người dùng và trạng thái đơn hàng
-            shopNameTextView.setText(order.getUserName());
+            // shopNameTextView.setText(order.getUserName()); // Comment lại vì view chưa được khởi tạo
             statusTextView.setText(order.getStatus());
 
             // Tên sản phẩm, số lượng, giá và tổng giá
@@ -88,6 +88,8 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.Orde
             orderIdTexView.setText(order.getOrderId());
 
             // Cập nhật tên nút Button dựa trên trạng thái đơn hàng
+            // Comment lại phần getBookButton vì view chưa được khởi tạo
+            /*
             if (order.getStatus().equals("Chờ xác nhận")) {
                 getBookButton.setText("Lấy hàng");
                 getBookButton.setVisibility(View.VISIBLE);
@@ -103,6 +105,7 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.Orde
             } else {
                 getBookButton.setVisibility(View.GONE);
             }
+            */
 
             // nút Button xem chi tiết đơn hàng
             getDetail.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +118,8 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.Orde
                 }
             });
 
+            // Comment lại phần getBookButton onClick vì view chưa được khởi tạo
+            /*
             // nút Button Thay đổi trạng thái đơn hàng và cập nhật giao diện
             getBookButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -138,6 +143,7 @@ public class OrderListAdapter extends RecyclerView.Adapter<OrderListAdapter.Orde
                     updateOrders(orderList.getOrdersForTab(currentTab));
                 }
             });
+            */
         }
     }
 

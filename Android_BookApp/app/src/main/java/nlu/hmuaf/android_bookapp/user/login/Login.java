@@ -105,12 +105,23 @@ public class Login extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     TokenResponseDTO responseDTO = response.body();
                     System.out.println(responseDTO);
+                    
+                    // Thêm log để debug
+                    System.out.println("=== DEBUG LOGIN ===");
+                    System.out.println("Token: " + responseDTO.getToken());
+                    System.out.println("Role: " + responseDTO.getRole());
+                    System.out.println("Username: " + responseDTO.getUsername());
+                    System.out.println("Message: " + responseDTO.getMessage());
+                    System.out.println("==================");
+                    
                     if (responseDTO.getMessage().equals("Login success!")) {
                         // Lưu TokenResponseDTO vào SharedPreferences
                         MyUtils.saveTokenResponse(Login.this, responseDTO);
                         cartService.syncCartWithServer(responseDTO, "Login");
                         Toast.makeText(Login.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(Login.this, HomeActivity.class);
+                        
+                        // Chuyển đến RoleBasedHomeActivity để xử lý chuyển hướng dựa trên role
+                        Intent intent = new Intent(Login.this, RoleBasedHomeActivity.class);
                         startActivity(intent);
                         finish();
                     } else if (responseDTO.getMessage().equals("Please verified your account!")) {

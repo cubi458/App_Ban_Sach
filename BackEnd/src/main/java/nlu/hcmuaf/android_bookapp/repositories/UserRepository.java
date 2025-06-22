@@ -1,5 +1,6 @@
 package nlu.hcmuaf.android_bookapp.repositories;
 
+import java.util.List;
 import java.util.Optional;
 import nlu.hcmuaf.android_bookapp.entities.Users;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,8 @@ public interface UserRepository extends CrudRepository<Users, Long> {
 
   @Query("SELECT u from Users u JOIN FETCH u.roles WHERE u.userId = :id")
   Optional<Users> findUsersByUserIdWithRole(@Param("id") long id);
+
+  @Query("SELECT u FROM Users u")
+  List<Users> findAllUsers();
 
 }

@@ -2,6 +2,7 @@ package nlu.hmuaf.android_bookapp.admin.manage_inventory;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -14,6 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nlu.hmuaf.android_bookapp.R;
+import nlu.hmuaf.android_bookapp.dto.response.ListBookResponseDTO;
+import nlu.hmuaf.android_bookapp.dto.response.TokenResponseDTO;
+import nlu.hmuaf.android_bookapp.networking.BookAppApi;
+import nlu.hmuaf.android_bookapp.networking.BookAppService;
+import nlu.hmuaf.android_bookapp.utils.MyUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ManageInventorDetailActivity extends AppCompatActivity {
 
@@ -22,6 +31,7 @@ public class ManageInventorDetailActivity extends AppCompatActivity {
     private BookAdapter bookAdapter;
     private List<Book> allBooks;
     private int tabIndex;
+    private BookAppApi bookAppApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,19 +41,57 @@ public class ManageInventorDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Tổng quan tồn kho");
+        getSupportActionBar().setTitle("Quản lý sản phẩm");
 
         tabLayout = findViewById(R.id.tab_layout);
         recyclerView = findViewById(R.id.rvProductList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        allBooks = (List<Book>) getIntent().getSerializableExtra("allBooks");
         tabIndex = getIntent().getIntExtra("tabIndex", 0);
+        
+        // Khởi tạo danh sách rỗng
+        allBooks = new ArrayList<>();
         bookAdapter = new BookAdapter(allBooks, ManageInventorDetailActivity.this);
         recyclerView.setAdapter(bookAdapter);
 
         setupTabs();
-        selectInitialTab();
+        loadBooksFromBackend();
+    }
+
+    private void loadBooksFromBackend() {
+        TokenResponseDTO tokenResponse = MyUtils.getTokenResponse(this);
+        if (tokenResponse != null) {
+            bookAppApi = BookAppService.getClient(tokenResponse.getToken());
+            Call<List<ListBookResponseDTO>> call = bookAppApi.getAllBooksForAdmin();
+            
+            call.enqueue(new Callback<List<ListBookResponseDTO>>() {
+                @Override
+                public void onResponse(Call<List<ListBookResponseDTO>> call, Response<List<ListBookResponseDTO>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        // Convert ListBookResponseDTO to Book objects
+                        allBooks.clear();
+                        for (ListBookResponseDTO dto : response.body()) {
+                            allBooks.add(new Book(dto));
+                        }
+                        
+                        bookAdapter.updateBooks(allBooks);
+                        updateTabTitles();
+                        selectInitialTab();
+                    } else {
+                        Toast.makeText(ManageInventorDetailActivity.this, 
+                            "Không thể tải dữ liệu sách", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<ListBookResponseDTO>> call, Throwable t) {
+                    Toast.makeText(ManageInventorDetailActivity.this, 
+                        "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Vui lòng đăng nhập lại", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupTabs() {

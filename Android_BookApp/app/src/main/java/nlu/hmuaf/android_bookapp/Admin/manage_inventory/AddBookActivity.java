@@ -36,6 +36,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import nlu.hmuaf.android_bookapp.R;
+import nlu.hmuaf.android_bookapp.dto.request.AddBookRequestDTO;
+import nlu.hmuaf.android_bookapp.dto.response.BookDetailResponseDTO;
+import nlu.hmuaf.android_bookapp.enums.EBookFormat;
+import nlu.hmuaf.android_bookapp.networking.BookAppApi;
+import nlu.hmuaf.android_bookapp.networking.BookAppService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddBookActivity extends AppCompatActivity {
 
@@ -133,10 +141,19 @@ public class AddBookActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnCancel = findViewById(R.id.btnCancel);
         ivThumbnail = findViewById(R.id.ivThumbnail);
-        rvBookImages = findViewById(R.id.rvBookImages);
         ivPublicationDate = findViewById(R.id.ivPublicationDate);
+        rvBookImages = findViewById(R.id.rvBookImages);
         spinnerPublishers = findViewById(R.id.spinnerPublishers);
         tvSelectedPublishers = findViewById(R.id.tvSelectedPublishers);
+
+        // Setup RecyclerView for book images
+        rvBookImages.setLayoutManager(new GridLayoutManager(this, 3));
+        adapter = new BookImagesAdapter(this, imageUris);
+        rvBookImages.setAdapter(adapter);
+
+        // Setup date picker
+        ivPublicationDate.setOnClickListener(v -> showDatePickerDialog());
+        etPublicationDate.setOnClickListener(v -> showDatePickerDialog());
     }
 
     private void showDatePickerDialog() {
@@ -162,29 +179,9 @@ public class AddBookActivity extends AppCompatActivity {
 
     private void requestStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Yêu cầu quyền")
-                        .setMessage("Ứng dụng cần quyền truy cập hình ảnh để tải ảnh.")
-                        .setPositiveButton("OK", (dialog, which) -> ActivityCompat.requestPermissions(AddBookActivity.this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, PERMISSIONS_REQUEST_READ_IMAGES))
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .create()
-                        .show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, PERMISSIONS_REQUEST_READ_IMAGES);
-            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, PERMISSIONS_REQUEST_READ_IMAGES);
         } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Yêu cầu quyền")
-                        .setMessage("Ứng dụng cần quyền truy cập bộ nhớ để tải ảnh.")
-                        .setPositiveButton("OK", (dialog, which) -> ActivityCompat.requestPermissions(AddBookActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_STORAGE))
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                        .create()
-                        .show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_STORAGE);
-            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_STORAGE);
         }
     }
 
@@ -201,12 +198,12 @@ public class AddBookActivity extends AppCompatActivity {
     }
 
     private void openImagePicker(boolean allowMultiple, int requestCode) {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*"); // Chọn loại dữ liệu là hình ảnh
-        if (allowMultiple && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        if (allowMultiple) {
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
-        startActivityForResult(intent, requestCode);
+        startActivityForResult(Intent.createChooser(intent, "Chọn hình ảnh"), requestCode);
     }
 
 
@@ -331,7 +328,45 @@ public class AddBookActivity extends AppCompatActivity {
     }
 
     private void saveBookDetails(String title, String id, String description, String price, String pages, String publicationDate, String language, String size, String format, String author, String discountCode, ArrayList<String> publishers) {
-        // Implementation of how you save these details to your backend or database
+        // Tạo AddBookRequestDTO
+        AddBookRequestDTO addBookRequestDTO = new AddBookRequestDTO();
+        addBookRequestDTO.setCode(id);
+        addBookRequestDTO.setTitle(title);
+        addBookRequestDTO.setDescription(description);
+        addBookRequestDTO.setPrice(Double.parseDouble(price));
+        addBookRequestDTO.setThumbnail("https://example.com/thumbnail.jpg"); // Placeholder
+        addBookRequestDTO.setAuthor(author);
+        addBookRequestDTO.setSize(size);
+        addBookRequestDTO.setNumPage(Integer.parseInt(pages));
+        addBookRequestDTO.setBookFormat(EBookFormat.fromString(format));
+        addBookRequestDTO.setPublishCompanyName(publishers.isEmpty() ? "NXB Kim Đồng" : publishers.get(0));
+        
+        // Convert image URIs to URLs (placeholder for now)
+        List<String> imageUrls = new ArrayList<>();
+        for (Uri uri : imageUris) {
+            imageUrls.add(uri.toString());
+        }
+        addBookRequestDTO.setBookImages(imageUrls);
+
+        // Gọi API để thêm sách
+        BookAppApi bookAppApi = BookAppService.getClient();
+        Call<BookDetailResponseDTO> call = bookAppApi.addBook(addBookRequestDTO);
+        call.enqueue(new Callback<BookDetailResponseDTO>() {
+            @Override
+            public void onResponse(Call<BookDetailResponseDTO> call, Response<BookDetailResponseDTO> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(AddBookActivity.this, "Thêm sách thành công!", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(AddBookActivity.this, "Lỗi: " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BookDetailResponseDTO> call, Throwable t) {
+                Toast.makeText(AddBookActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

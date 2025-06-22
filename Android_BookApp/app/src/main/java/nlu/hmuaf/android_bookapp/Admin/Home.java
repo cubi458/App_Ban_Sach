@@ -3,9 +3,11 @@ package nlu.hmuaf.android_bookapp.admin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,20 +15,29 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import nlu.hmuaf.android_bookapp.admin.manage_inventory.AddBookActivity;
 import nlu.hmuaf.android_bookapp.admin.manage_inventory.ManageInventoryActivity;
+import nlu.hmuaf.android_bookapp.admin.manage_inventory.ManageInventorDetailActivity;
 import nlu.hmuaf.android_bookapp.admin.order.activity.OrderList;
 import nlu.hmuaf.android_bookapp.R;
+import nlu.hmuaf.android_bookapp.dto.response.TokenResponseDTO;
+import nlu.hmuaf.android_bookapp.user.login.Login;
+import nlu.hmuaf.android_bookapp.utils.MyUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Home extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private LinearLayout orderManagementSubmenu, productManagementSubmenu, userManagementSubmenu;
     private TextView navSalesManagement , listOrderSubMenu, listAddOrderSubMenu, listInStockSubMenu, listProductSubMenu,
-            listAddProductSubMenu, listUserSubMenu, listAddUserSubMenu;
+            listAddProductSubMenu, listUserSubMenu, listAddUserSubMenu, adminWelcomeText, logoutText;
     private ImageView navOrderManagement,navProductManagement,navUserManagement;
+    private Button logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.admin_home);
+        
+        System.out.println("=== ADMIN HOME DEBUG: onCreate started ===");
 
         // Khai báo
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -35,6 +46,37 @@ public class Home extends AppCompatActivity {
 
         // nút hiển thị các nav
         orderManagementSubmenu = findViewById(R.id.order_management_submenu);
+
+        // Hiển thị thông tin admin
+        adminWelcomeText = findViewById(R.id.user_name);
+        logoutText = findViewById(R.id.user_email);
+        
+        // Lấy thông tin user
+        TokenResponseDTO tokenResponse = MyUtils.getTokenResponse(this);
+        System.out.println("=== ADMIN HOME DEBUG: TokenResponse = " + tokenResponse + " ===");
+        
+        if (tokenResponse != null) {
+            String welcomeMessage = "Admin: " + tokenResponse.getUsername();
+            adminWelcomeText.setText(welcomeMessage);
+            logoutText.setText(tokenResponse.getEmail());
+            System.out.println("=== ADMIN HOME DEBUG: Welcome message set = " + welcomeMessage + " ===");
+        } else {
+            System.out.println("=== ADMIN HOME DEBUG: TokenResponse is null ===");
+        }
+        
+        // Xử lý đăng xuất - thay đổi TextView thành clickable
+        logoutButton = findViewById(R.id.logout_button);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyUtils.deleteTokenResponse(Home.this);
+                Toast.makeText(Home.this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Home.this, Login.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         // Chọn Quản lý đơn hàng => Danh sách đơn hàng, Thêm đơn hàng và Danh sách tồn kho
         navOrderManagement = findViewById(R.id.nav_order_management);
@@ -90,14 +132,15 @@ public class Home extends AppCompatActivity {
         listProductSubMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-//                Intent intent = new Intent(AdminHome.this, ManageOrder.class);
-//                startActivity(intent);
+                Intent intent = new Intent(Home.this, ManageInventorDetailActivity.class);
+                intent.putExtra("tabIndex", 0); // Hiển thị tất cả sản phẩm
+                startActivity(intent);
             }
         });
 
         // Chọn Thêm sản phẩm
-        listAddOrderSubMenu = findViewById(R.id.list_addProduct_submenu);
-        listAddOrderSubMenu.setOnClickListener(new View.OnClickListener() {
+        listAddProductSubMenu = findViewById(R.id.list_addProduct_submenu);
+        listAddProductSubMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
                 Intent intent = new Intent(Home.this, AddBookActivity.class);
@@ -129,8 +172,8 @@ public class Home extends AppCompatActivity {
         listUserSubMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-//                Intent intent = new Intent(AdminHome.this, ManageOrder.class);
-//                startActivity(intent);
+                Intent intent = new Intent(Home.this, nlu.hmuaf.android_bookapp.admin.user.UserListActivity.class);
+                startActivity(intent);
             }
         });
 

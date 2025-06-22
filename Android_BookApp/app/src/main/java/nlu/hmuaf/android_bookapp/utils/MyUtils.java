@@ -79,18 +79,34 @@ public class MyUtils {
 
     public static boolean isTokenExpiration(Context context) {
         try {
-            JWT jwt = new JWT(MyUtils.getTokenResponse(context).getToken());
+            TokenResponseDTO tokenResponse = getTokenResponse(context);
+            if (tokenResponse == null || tokenResponse.getToken() == null) {
+                System.out.println("=== TOKEN DEBUG: TokenResponse is null or token is null ===");
+                return false;
+            }
+            
+            System.out.println("=== TOKEN DEBUG ===");
+            System.out.println("Token: " + tokenResponse.getToken());
+            System.out.println("Role: " + tokenResponse.getRole());
+            
+            JWT jwt = new JWT(tokenResponse.getToken());
             Date dateExpire = jwt.getExpiresAt();
-            System.out.println(dateExpire);
+            System.out.println("Token expiration date: " + dateExpire);
+            System.out.println("Current date: " + new Date());
+            
             if (dateExpire.before(new Date())) {
                 // Token đã hết hạn
+                System.out.println("=== TOKEN DEBUG: Token has expired ===");
                 showTokenExpireDialog(context);
                 return false;
             } else {
                 // Token chưa hết hạn
+                System.out.println("=== TOKEN DEBUG: Token is valid ===");
                 return true;
             }
         } catch (Exception e) {
+            System.out.println("=== TOKEN DEBUG: Exception occurred ===");
+            System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
         return false;

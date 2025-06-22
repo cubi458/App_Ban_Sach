@@ -56,10 +56,10 @@
                 android:textSize="14sp" />
 
             <Button
+                android:id="@+id/logout_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="230dp"
-                android:onClick="onAddOrderClick"
                 android:text="Đăng xuất" />
 
         </RelativeLayout>

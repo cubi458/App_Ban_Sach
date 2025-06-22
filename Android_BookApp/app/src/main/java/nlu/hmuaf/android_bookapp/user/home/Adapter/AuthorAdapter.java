@@ -122,3 +122,4 @@ public class AuthorAdapter extends RecyclerView.Adapter<AuthorAdapter.AuthorView
 //            textView = itemView.findViewById(R.id.AuthorItemTextView);
 //        }
 //    }
+

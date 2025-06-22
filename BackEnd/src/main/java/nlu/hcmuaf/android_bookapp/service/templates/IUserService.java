@@ -9,6 +9,8 @@ import nlu.hcmuaf.android_bookapp.dto.request.VerifyRequestDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListAddressResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.MessageResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.TokenResponseDTO;
+import nlu.hcmuaf.android_bookapp.entities.Users;
+import nlu.hcmuaf.android_bookapp.dto.response.UserAdminResponseDTO;
 
 public interface IUserService extends IDataInitializer {
 
@@ -27,4 +29,6 @@ public interface IUserService extends IDataInitializer {
   List<ListAddressResponseDTO> updateAddress(long userId, AddressRequestDTO requestDTO);
 
   List<ListAddressResponseDTO> deleteAddress(long userId, long addressId);
+
+  List<UserAdminResponseDTO> getAllUsers();
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EEF4FB"
+    android:orientation="vertical">
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:navigationIcon="@drawable/baseline_arrow_back_ios_24"
+        app:title="Payment" />
+
+    <com.anton46.stepsview.StepsView
+        android:id="@+id/stepViewInPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#EEF4FB" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupPaymentMethods"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:id="@+id/radioButton_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thanh toán khi nhận hàng"
+            android:textColor="@color/black" />
+
+        <RadioButton
+            android:id="@+id/radioButton_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thẻ ngân hàng"
+            android:textColor="@color/black" />
+
+        <RadioButton
+            android:id="@+id/radioButton_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MoMo"
+            android:textColor="@color/black" />
+
+        <RadioButton
+            android:id="@+id/radioButton_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thẻ tín dụng"
+            android:textColor="@color/black" />
+
+    </RadioGroup>
+
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="193dp"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/buttonPayNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="44dp"
+            android:text="PAY NOW" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

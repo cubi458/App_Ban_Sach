@@ -70,4 +70,16 @@ public interface BookRepository extends JpaRepository<Books, Long>,
           "GROUP BY b.bookId,  b.title, bd.author , b.price,dc.percent, b.description, pl.companyName"
   )
   Optional<BookDetailResponseDTO> getBooksDetailsByBookId(@Param("bookId") long bookId);
+
+  @Query(
+      "SELECT new nlu.hcmuaf.android_bookapp.dto.response.ListBookResponseDTO(b.bookId, b.thumbnail, b.title, bd.author, COALESCE(AVG(br.rating.star), 0.0), b.price, COALESCE(SUM(sd.quantity), 0), COALESCE(dc.percent, 0.0)) " +
+      "FROM Books b " +
+      "LEFT JOIN b.bookDetails bd " +
+      "LEFT JOIN b.bookRatings br " +
+      "LEFT JOIN b.shipmentDetails sd " +
+      "LEFT JOIN b.discounts dc " +
+      "GROUP BY b.bookId, b.thumbnail, b.title, bd.author, b.price, dc.percent " +
+      "ORDER BY b.bookId"
+  )
+  List<ListBookResponseDTO> getAllBooksForAdmin();
 }

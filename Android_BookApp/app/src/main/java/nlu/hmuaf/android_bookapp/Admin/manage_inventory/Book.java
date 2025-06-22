@@ -3,6 +3,7 @@ package nlu.hmuaf.android_bookapp.admin.manage_inventory;
 import java.io.Serializable;
 
 public class Book implements Serializable {
+    private long bookId;
     private String title;
     private String bookID;
     private String description;
@@ -18,8 +19,50 @@ public class Book implements Serializable {
     private String imageUrl;
     private String status;
     private String storageLocation;
-    private boolean preOrder; // Thêm thuộc tính này
+    private boolean preOrder;
+    private String thumbnail;
+    private Double averageRating;
+    private double originalPrice;
+    private double discountedPrice;
+    private Double discount;
 
+    // Constructor mặc định
+    public Book() {
+    }
+
+    // Constructor từ ListBookResponseDTO
+    public Book(nlu.hmuaf.android_bookapp.dto.response.ListBookResponseDTO dto) {
+        this.bookId = dto.getBookId();
+        this.title = dto.getTitle();
+        this.author = dto.getAuthor();
+        this.thumbnail = dto.getThumbnail();
+        this.averageRating = dto.getAverageRating();
+        this.originalPrice = dto.getOriginalPrice();
+        this.discountedPrice = dto.getDiscountedPrice();
+        this.quantity = dto.getQuantity() != null ? dto.getQuantity().intValue() : 0;
+        this.discount = dto.getDiscount();
+        
+        // Set status dựa trên quantity
+        if (this.quantity > 10) {
+            this.status = "In Stock";
+        } else if (this.quantity > 0) {
+            this.status = "Low Stock";
+        } else {
+            this.status = "Out of Stock";
+        }
+        
+        // Set imageUrl từ thumbnail
+        this.imageUrl = dto.getThumbnail();
+    }
+
+    // Getters và Setters
+    public long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(long bookId) {
+        this.bookId = bookId;
+    }
 
     public String getTitle() {
         return title;
@@ -140,11 +183,52 @@ public class Book implements Serializable {
     public void setStorageLocation(String storageLocation) {
         this.storageLocation = storageLocation;
     }
+
     public boolean isPreOrder() {
         return preOrder;
     }
 
     public void setPreOrder(boolean preOrder) {
         this.preOrder = preOrder;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public double getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public double getDiscountedPrice() {
+        return discountedPrice;
+    }
+
+    public void setDiscountedPrice(double discountedPrice) {
+        this.discountedPrice = discountedPrice;
+    }
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
     }
 }

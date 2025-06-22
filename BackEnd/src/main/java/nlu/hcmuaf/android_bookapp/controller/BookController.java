@@ -1,6 +1,7 @@
 package nlu.hcmuaf.android_bookapp.controller;
 
 import java.util.List;
+import nlu.hcmuaf.android_bookapp.dto.request.AddBookRequestDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.BookDetailResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListBookResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.PageBookResponseDTO;
@@ -13,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,5 +59,15 @@ public class BookController {
     PageRequest pageRequest = PageRequest.of(page, size);
     return ResponseEntity.ok(
         bookService.findBooks(title, bookType, coverType, publisher, pageRequest));
+  }
+
+  @GetMapping("/admin/all-books")
+  public ResponseEntity<List<ListBookResponseDTO>> getAllBooksForAdmin() {
+    return ResponseEntity.ok(bookService.getAllBooksForAdmin());
+  }
+
+  @PostMapping("/admin/add-book")
+  public ResponseEntity<BookDetailResponseDTO> addBook(@RequestBody AddBookRequestDTO addBookRequestDTO) {
+    return ResponseEntity.ok(bookService.addBook(addBookRequestDTO));
   }
 }

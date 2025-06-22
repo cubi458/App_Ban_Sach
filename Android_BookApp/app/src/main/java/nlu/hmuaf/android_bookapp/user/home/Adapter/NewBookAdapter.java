@@ -142,3 +142,4 @@ public class NewBookAdapter extends RecyclerView.Adapter<NewBookAdapter.PopularV
         notifyDataSetChanged();
     }
 }
+

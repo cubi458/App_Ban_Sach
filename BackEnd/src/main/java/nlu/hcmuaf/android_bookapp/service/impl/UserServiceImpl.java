@@ -18,6 +18,7 @@ import nlu.hcmuaf.android_bookapp.dto.request.VerifyRequestDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.ListAddressResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.MessageResponseDTO;
 import nlu.hcmuaf.android_bookapp.dto.response.TokenResponseDTO;
+import nlu.hcmuaf.android_bookapp.dto.response.UserAdminResponseDTO;
 import nlu.hcmuaf.android_bookapp.entities.Addresses;
 import nlu.hcmuaf.android_bookapp.entities.Carts;
 import nlu.hcmuaf.android_bookapp.entities.UserAddresses;
@@ -232,8 +233,15 @@ public class UserServiceImpl implements IUserService {
         cart.setUser(users);
         users.setCart(cart);
 
-        emailService.sendVerificationCode(requestDTO.getEmail(), otp);
+        // Lưu user trước
         userRepository.save(users);
+
+        // Gửi OTP, nếu lỗi chỉ log, không throw
+        try {
+          emailService.sendVerificationCode(requestDTO.getEmail(), otp);
+        } catch (Exception e) {
+          logger.error("Send OTP failed: " + e.getMessage());
+        }
 
         return MessageResponseDTO.builder()
             .message("Register success!")
@@ -258,7 +266,7 @@ public class UserServiceImpl implements IUserService {
       if (users.isPresent()) {
         if (users.get().getUserDetails().isVerified()) {
           return MessageResponseDTO.builder()
-              .message("User already verified")
+              .message("Verified successfully")
               .build();
         }
 
@@ -491,5 +499,31 @@ public class UserServiceImpl implements IUserService {
       e.printStackTrace();
     }
     return new ArrayList<>();
+  }
+
+  @Override
+  public List<UserAdminResponseDTO> getAllUsers() {
+    System.out.println("=== DEBUG: Đã vào API lấy danh sách user ===");
+    List<Users> users = userRepository.findAllUsers();
+    System.out.println("=== DEBUG: Số lượng user lấy được: " + users.size());
+    for (Users u : users) {
+      System.out.println("User: " + u.getUserId() + ", username: " + u.getUsername() +
+          ", role: " + (u.getRoles() != null ? u.getRoles().getRoleName() : "null") +
+          ", email: " + (u.getUserDetails() != null ? u.getUserDetails().getEmail() : "null"));
+    }
+    List<UserAdminResponseDTO> result = new ArrayList<>();
+    for (Users u : users) {
+      String email = (u.getUserDetails() != null) ? u.getUserDetails().getEmail() : "";
+      String role = (u.getRoles() != null) ? u.getRoles().getRoleName().toString() : "";
+      String createdDate = (u.getCreatedDate() != null) ? u.getCreatedDate().toString() : "";
+      result.add(new UserAdminResponseDTO(
+          u.getUserId(),
+          u.getUsername(),
+          email,
+          role,
+          createdDate
+      ));
+    }
+    return result;
   }
 }

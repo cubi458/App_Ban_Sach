@@ -67,19 +67,15 @@ public class Activate extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     MessageResponseDTO messageResponseDTO = response.body();
-                    if (messageResponseDTO.getMessage().equals("Verified success")) {
+                    String msg = messageResponseDTO.getMessage() != null ? messageResponseDTO.getMessage().toLowerCase() : "";
+                    if (msg.contains("verified")) {
                         Toast.makeText(Activate.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(Activate.this, Login.class);
                         startActivity(intent);
                         finish();
-                    } else if (messageResponseDTO.getMessage().equals("User already verified!")) {
-                        Toast.makeText(Activate.this, "Tài khoản đã được xác thực!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(Activate.this, Login.class);
-                        startActivity(intent);
-                        finish();
-                    } else if (messageResponseDTO.getMessage().equals("Your otp is expired! Please validate again")) {
+                    } else if (msg.contains("expired")) {
                         Toast.makeText(Activate.this, "Mã otp đã hết hạn. Vui lòng nhập mã otp mới!", Toast.LENGTH_SHORT).show();
-                    } else if (messageResponseDTO.getMessage().equals("Please enter right OTP")) {
+                    } else if (msg.contains("otp")) {
                         Toast.makeText(Activate.this, "Vui lòng nhập đúng mã otp!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(Activate.this, "Lỗi hệ thống!", Toast.LENGTH_SHORT).show();
